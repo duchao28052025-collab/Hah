@@ -1,0 +1,224 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+math.randomseed(tick())
+
+local old = playerGui:FindFirstChild("AutoJump_RobotGUI")
+if old then old:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AutoJump_RobotGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = playerGui
+
+local jumping = false
+
+local IntroFrame = Instance.new("Frame")
+IntroFrame.Name = "IntroFrame"
+IntroFrame.Size = UDim2.new(1,0,1,0)
+IntroFrame.BackgroundTransparency = 1
+IntroFrame.Parent = ScreenGui
+
+local function randScale()
+	return math.random(5,95)/100
+end
+
+local function createRainDrop(parent)
+	local drop = Instance.new("TextLabel")
+	drop.Size = UDim2.new(0,2,0,math.random(8,14))
+	drop.Position = UDim2.new(randScale(), 0, -0.12, 0)
+	drop.BackgroundTransparency = 1
+	drop.Text = "|"
+	drop.TextSize = math.random(12,16)
+	drop.TextColor3 = Color3.new(1,1,1)
+	drop.TextTransparency = 0.25
+	drop.Font = Enum.Font.RobotoMono
+	drop.Parent = parent
+
+	local dur = math.random(11,18) / 10
+	local targetX = drop.Position.X.Scale + (math.random(-10,10)/100)
+	if targetX < 0 then targetX = 0.02 end
+	if targetX > 1 then targetX = 0.98 end
+
+	local tween = TweenService:Create(drop, TweenInfo.new(dur, Enum.EasingStyle.Linear), {
+		Position = UDim2.new(targetX, 0, 1.15, 0),
+		TextTransparency = 1
+	})
+	tween:Play()
+	tween.Completed:Connect(function() if drop and drop.Parent then drop:Destroy() end end)
+end
+
+task.spawn(function()
+	for i = 1, 120 do
+		createRainDrop(IntroFrame)
+		task.wait(0.04)
+	end
+end)
+
+local Eye = {}
+local centerX = 0.42
+local gap = 0.03
+for i = 1, 5 do
+	local s = Instance.new("TextLabel")
+	s.Size = UDim2.new(0,28,0,36)
+	s.Position = UDim2.new(centerX + (i-3)*gap, 0, 0.26, 0)
+	s.BackgroundTransparency = 1
+	s.Text = "_"
+	s.TextColor3 = (i==3) and Color3.fromRGB(0,160,255) or Color3.new(1,1,1)
+	s.TextSize = 30
+	s.Font = Enum.Font.RobotoMono
+	s.TextTransparency = 1
+	s.Parent = IntroFrame
+	Eye[i] = s
+end
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0,150,0,42)
+Title.Position = UDim2.new(-0.5,0,0.42,0)
+Title.BackgroundTransparency = 1
+Title.Text = "Grrr"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.TextSize = 30
+Title.Font = Enum.Font.RobotoMono
+Title.TextTransparency = 1
+Title.Parent = IntroFrame
+
+local ArmL = Instance.new("TextLabel")
+ArmL.Size = UDim2.new(0,36,0,36)
+ArmL.Position = UDim2.new(0.30,0,0.43,0)
+ArmL.BackgroundTransparency = 1
+ArmL.Text = "_"
+ArmL.TextColor3 = Color3.new(1,1,1)
+ArmL.TextSize = 30
+ArmL.Font = Enum.Font.RobotoMono
+ArmL.TextTransparency = 1
+ArmL.Parent = IntroFrame
+
+local ArmR = ArmL:Clone()
+ArmR.Position = UDim2.new(0.57,0,0.43,0)
+ArmR.Parent = IntroFrame
+
+local Tail = Instance.new("TextLabel")
+Tail.Size = UDim2.new(0,28,0,32)
+Tail.Position = UDim2.new(0.45,0,0.55,0)
+Tail.BackgroundTransparency = 1
+Tail.Text = "_"
+Tail.TextColor3 = Color3.new(1,1,1)
+Tail.TextSize = 26
+Tail.Font = Enum.Font.RobotoMono
+Tail.TextTransparency = 1
+Tail.Parent = IntroFrame
+
+local function pulseEyeCenter()
+	local center = Eye[3]
+	if not center then return end
+	local a = TweenService:Create(center, TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(120,220,255)})
+	local b = TweenService:Create(center, TweenInfo.new(0.45, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(0,160,255)})
+	a:Play()
+	a.Completed:Wait()
+	b:Play()
+end
+
+task.spawn(function()
+	for i = 1, #Eye do
+		TweenService:Create(Eye[i], TweenInfo.new(0.25, Enum.EasingStyle.Quad), {TextTransparency = 0}):Play()
+		task.wait(0.16)
+	end
+
+	task.wait(0.4)
+	pulseEyeCenter()
+	task.wait(0.2)
+
+	local t1 = TweenService:Create(Title, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.37, 0, 0.43, 0), TextTransparency = 0})
+	t1:Play()
+	t1.Completed:Wait()
+
+	pulseEyeCenter()
+	task.wait(0.15)
+
+	local armLt = TweenService:Create(ArmL, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		TextTransparency = 0, Rotation = -30, Position = UDim2.new(0.295, 0, 0.405, 0)
+	})
+	local armRt = TweenService:Create(ArmR, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		TextTransparency = 0, Rotation = 30, Position = UDim2.new(0.575, 0, 0.405, 0)
+	})
+	local tailTween = TweenService:Create(Tail, TweenInfo.new(0.45, Enum.EasingStyle.Quad), {
+		TextTransparency = 0, Rotation = 12, Position = UDim2.new(0.45, 0, 0.52, 0)
+	})
+
+	armLt:Play()
+	armRt:Play()
+	tailTween:Play()
+	task.delay(0.25, pulseEyeCenter)
+
+	task.wait(3.3)
+	for _, child in ipairs(IntroFrame:GetDescendants()) do
+		if child:IsA("TextLabel") then
+			TweenService:Create(child, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {TextTransparency = 1}):Play()
+		end
+	end
+	task.wait(0.45)
+	if IntroFrame and IntroFrame.Parent then IntroFrame:Destroy() end
+end)
+
+local function createButton()
+	if ScreenGui:FindFirstChild("AutoJumpButton") then
+		return ScreenGui.AutoJumpButton
+	end
+
+	local btn = Instance.new("TextButton")
+	btn.Name = "AutoJumpButton"
+	btn.Size = UDim2.new(0, 150, 0, 46)
+	btn.Position = UDim2.new(0.8, 0, 0.85, 0)
+	btn.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+	btn.BackgroundTransparency = 0.45
+	btn.BorderSizePixel = 2
+	btn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.Text = "Auto Jump: OFF"
+	btn.Font = Enum.Font.RobotoMono
+	btn.TextSize = 18
+	btn.Parent = ScreenGui
+	btn.Active = true
+	btn.Draggable = true
+	btn.Visible = false
+
+	btn.MouseButton1Click:Connect(function()
+		jumping = not jumping
+		if jumping then
+			btn.Text = "Auto Jump: ON"
+			btn.BorderColor3 = Color3.fromRGB(0, 220, 0)
+		else
+			btn.Text = "Auto Jump: OFF"
+			btn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+		end
+	end)
+
+	return btn
+end
+
+local Button = createButton()
+
+task.delay(6.1, function()
+	if Button and Button.Parent then
+		Button.Visible = true
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if jumping then
+		local char = player.Character
+		if char then
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			if hum and hum.Health > 0 then
+				local st = hum:GetState()
+				if st ~= Enum.HumanoidStateType.Jumping and st ~= Enum.HumanoidStateType.Freefall then
+					hum:ChangeState(Enum.HumanoidStateType.Jumping)
+				end
+			end
+		end
+	end
+end)

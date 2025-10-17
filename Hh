@@ -1,0 +1,16 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/duchao28052025-collab/Haodz/refs/heads/main/zingpro.lua')))()
+
+local Window = OrionLib:MakeWindow({Name = "Haohup", HidePremium = false, SaveConfig = true, ConfigFolder = "dxl_bf"})
+
+local Tab = Window:MakeTab({
+	Name = "Skill by hao",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+Tab:AddButton({
+	Name = "Kiba",
+	Callback = function()
+        repeat wait(0) until game:IsLoaded()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/duchao28052025-collab/Hah/refs/heads/main/Autojump"))()
+  end
+ })
